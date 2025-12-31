@@ -24,6 +24,8 @@
 #include <iostream>
 #include "Event2.h"
 
+using namespace std;
+
 ostream& operator << (ostream& os, const Event2& event)
 {
     time_t tExpirationTimePoint = chrono::system_clock::to_time_t(event._expirationTimePoint);

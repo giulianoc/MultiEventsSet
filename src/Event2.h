@@ -21,13 +21,10 @@
  with the authors.
 */
 
-#ifndef Event2_h
-#define Event2_h
+#pragma once
 
 #include <string>
 #include <chrono>
-
-using namespace std;
 
 
 /**
@@ -53,15 +50,15 @@ class Event2
 {
 private:
     // _typeIdentifier, _identifier
-    pair<long,long>         _eventKey;
-    string                  _source;
-    string                  _destination;
+    std::pair<long,long>         _eventKey;
+    std::string                  _source;
+    std::string                  _destination;
 
-    chrono::system_clock::time_point   _expirationTimePoint;
-    chrono::system_clock::time_point   _startProcessingTime;
+    std::chrono::system_clock::time_point   _expirationTimePoint;
+    std::chrono::system_clock::time_point   _startProcessingTime;
 
 public:
-    friend ostream& operator << (ostream& os, const Event2& event);
+    friend std::ostream& operator << (std::ostream& os, const Event2& event);
 
     /**
         Questo metodo inizializza l'evento.
@@ -83,46 +80,44 @@ public:
 
     virtual ~Event2 (void) {  };
 
-    pair<long, long> getEventKey() const {
+    std::pair<long, long> getEventKey() const {
         return _eventKey;
     }
 
-    void setEventKey(pair<long, long> eventKey) {
+    void setEventKey(std::pair<long, long> eventKey) {
         this->_eventKey = eventKey;
     }
 
-    string getDestination() const {
+    std::string getDestination() const {
         return _destination;
     }
 
-    void setDestination(string _destination) {
+    void setDestination(std::string _destination) {
         this->_destination = _destination;
     }
 
-    string getSource() const {
+    std::string getSource() const {
         return _source;
     }
 
-    void setSource(string _source) {
+    void setSource(std::string _source) {
         this->_source = _source;
     }
 
-    chrono::system_clock::time_point getStartProcessingTime() const {
+    std::chrono::system_clock::time_point getStartProcessingTime() const {
         return _startProcessingTime;
     }
 
-    void setStartProcessingTime(chrono::system_clock::time_point _startProcessingTime) {
+    void setStartProcessingTime(std::chrono::system_clock::time_point _startProcessingTime) {
         this->_startProcessingTime = _startProcessingTime;
     }
 
-    chrono::system_clock::time_point getExpirationTimePoint() const {
+    std::chrono::system_clock::time_point getExpirationTimePoint() const {
         return _expirationTimePoint;
     }
 
-    void setExpirationTimePoint(chrono::system_clock::time_point _expirationTimePoint) {
+    void setExpirationTimePoint(std::chrono::system_clock::time_point _expirationTimePoint) {
         this->_expirationTimePoint = _expirationTimePoint;
     }
 };
-
-#endif
 

@@ -21,9 +21,7 @@
  with the authors.
 */
 
-#ifndef EventsFactory_h
-    
-#define EventsFactory_h
+#pragma once
 
 #include <deque>
 #include <map>
@@ -33,12 +31,10 @@
 #include <memory>
 #include "Event2.h"
 
-using namespace std;
-
 class EventsFactory
 {
 private:
-    using UsedEventsMap = map<pair<long,long>, shared_ptr<Event2>>;
+    using UsedEventsMap = std::map<std::pair<long,long>, std::shared_ptr<Event2>>;
 
     struct EventTypeInfo
     {
@@ -47,13 +43,13 @@ private:
         long                _maxEventsNumberToBeAllocated;
 
         long                _currentEventsNumber;
-        deque<shared_ptr<Event2>>    _freeEvents;
+        std::deque<std::shared_ptr<Event2>>    _freeEvents;
         UsedEventsMap       _usedEvents;
     };
 
-    using EventsTypeHashMap = unordered_map<long, shared_ptr<EventTypeInfo>>;
+    using EventsTypeHashMap = std::unordered_map<long, std::shared_ptr<EventTypeInfo>>;
 
-    recursive_mutex     _mtEvents;
+    std::recursive_mutex     _mtEvents;
     EventsTypeHashMap   _ethmEvents;
 
     const long          _defaultBlockEventsNumber = 50;
@@ -68,15 +64,15 @@ public:
 
     EventsFactory (EventsFactory&& eventsFactory);
     
-    friend ostream& operator << (ostream& os, const EventsFactory& eventsFactory);
+    friend std::ostream& operator << (std::ostream& os, const EventsFactory& eventsFactory);
 
     void addEventType (long eventTypeIdentifier, long blockEventsNumber, 
         long maxEventsNumberToBeAllocated);
 
     template<typename T>
-    shared_ptr<T> getFreeEvent (long eventTypeIdentifier)
+    std::shared_ptr<T> getFreeEvent (long eventTypeIdentifier)
     {
-        lock_guard<recursive_mutex> locker(_mtEvents);
+        std::lock_guard<std::recursive_mutex> locker(_mtEvents);
 
         EventsTypeHashMap::const_iterator itEventType = _ethmEvents.find(eventTypeIdentifier);
         if (itEventType == _ethmEvents.end())
@@ -86,30 +82,30 @@ public:
             itEventType = _ethmEvents.find(eventTypeIdentifier);
             if (itEventType == _ethmEvents.end())
             {
-                throw runtime_error(string("Error adding the Event Type identifier") 
-                        + ", eventTypeIdentifier: " + to_string(eventTypeIdentifier));
+                throw std::runtime_error(std::string("Error adding the Event Type identifier")
+                        + ", eventTypeIdentifier: " + std::to_string(eventTypeIdentifier));
             }
         }
 
-        const shared_ptr<EventTypeInfo>& eventTypeInfo = itEventType->second;
-        deque<shared_ptr<Event2>>& freeEvents = eventTypeInfo->_freeEvents;
+        const std::shared_ptr<EventTypeInfo>& eventTypeInfo = itEventType->second;
+        std::deque<std::shared_ptr<Event2>>& freeEvents = eventTypeInfo->_freeEvents;
 
         if (freeEvents.size() == 0)
         {
             if (eventTypeInfo->_currentEventsNumber + eventTypeInfo->_blockEventsNumber >= eventTypeInfo->_maxEventsNumberToBeAllocated)
             {
-                throw runtime_error(string("No more events to be allocated, reached the max number for the event type") 
-                        + ", _currentEventsNumber: " + to_string(eventTypeInfo->_currentEventsNumber)
-                        + ", _blockEventsNumber: " + to_string(eventTypeInfo->_blockEventsNumber)
-                        + ", _maxEventsNumberToBeAllocated: " + to_string(eventTypeInfo->_maxEventsNumberToBeAllocated)
+                throw std::runtime_error(std::string("No more events to be allocated, reached the max number for the event type")
+                        + ", _currentEventsNumber: " + std::to_string(eventTypeInfo->_currentEventsNumber)
+                        + ", _blockEventsNumber: " + std::to_string(eventTypeInfo->_blockEventsNumber)
+                        + ", _maxEventsNumberToBeAllocated: " + std::to_string(eventTypeInfo->_maxEventsNumberToBeAllocated)
                         );
             }
 
             for (int eventIndex = 0; eventIndex < eventTypeInfo->_blockEventsNumber; eventIndex++)
             {
-                shared_ptr<Event2>   event   = make_shared<T>();
+                std::shared_ptr<Event2>   event   = std::make_shared<T>();
 
-                event->setEventKey(make_pair(eventTypeInfo->_eventTypeIdentifier, eventTypeInfo->_currentEventsNumber));
+                event->setEventKey(std::make_pair(eventTypeInfo->_eventTypeIdentifier, eventTypeInfo->_currentEventsNumber));
 
                 freeEvents.push_back(event);
 
@@ -120,12 +116,12 @@ public:
         {
             UsedEventsMap   &usedEvents  = eventTypeInfo->_usedEvents;
 
-            shared_ptr<T> event	= dynamic_pointer_cast<T>(freeEvents.front());
+            std::shared_ptr<T> event	= dynamic_pointer_cast<T>(freeEvents.front());
 
-            event->setStartProcessingTime(chrono::system_clock::now());
+            event->setStartProcessingTime(std::chrono::system_clock::now());
 
             freeEvents.pop_front();
-            usedEvents.insert(make_pair(make_pair(event->getEventKey().first,event->getEventKey().second), event));
+            usedEvents.insert(std::make_pair(std::make_pair(event->getEventKey().first,event->getEventKey().second), event));
 
             
             return event;
@@ -133,28 +129,28 @@ public:
     }
 
     template<typename T>
-    void releaseEvent (shared_ptr<T>& event)
+    void releaseEvent (std::shared_ptr<T>& event)
     {
-        lock_guard<recursive_mutex> locker(_mtEvents);
+        std::lock_guard<std::recursive_mutex> locker(_mtEvents);
 
         EventsTypeHashMap::const_iterator itEventType = _ethmEvents.find(event->getEventKey().first);
         if (itEventType == _ethmEvents.end())
         {
-            throw runtime_error(string("Event Type was not found") 
-                    + ", eventTypeIdentifier: " + to_string(event->getEventKey().first));
+            throw std::runtime_error(std::string("Event Type was not found")
+                    + ", eventTypeIdentifier: " + std::to_string(event->getEventKey().first));
         }
 
-        const shared_ptr<EventTypeInfo>& eventTypeInfo = itEventType->second;
+        const std::shared_ptr<EventTypeInfo>& eventTypeInfo = itEventType->second;
 
-        deque<shared_ptr<Event2>> &freeEvents = eventTypeInfo->_freeEvents;
+        std::deque<std::shared_ptr<Event2>> &freeEvents = eventTypeInfo->_freeEvents;
         UsedEventsMap   &usedEvents  = eventTypeInfo->_usedEvents;
 
-        UsedEventsMap::const_iterator itEvent = usedEvents.find(make_pair(event->getEventKey().first, event->getEventKey().second));
+        UsedEventsMap::const_iterator itEvent = usedEvents.find(std::make_pair(event->getEventKey().first, event->getEventKey().second));
         if (itEvent == usedEvents.end())
         {
-            throw runtime_error(string("Event was not found") 
-                    + ", event->getEventKey().first: " + to_string(event->getEventKey().first)
-                    + ", event->getEventKey().second: " + to_string(event->getEventKey().second)
+            throw std::runtime_error(std::string("Event was not found")
+                    + ", event->getEventKey().first: " + std::to_string(event->getEventKey().first)
+                    + ", event->getEventKey().second: " + std::to_string(event->getEventKey().second)
                     );
         }
 
@@ -162,5 +158,3 @@ public:
         usedEvents.erase(itEvent);
     }
 } ;
-
-#endif

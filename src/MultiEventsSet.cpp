@@ -24,6 +24,8 @@
 #include "MultiEventsSet.h"
 #include <chrono>
 
+using namespace std;
+
 MultiEventsSet:: MultiEventsSet (void)
 {
     _eventsFactory = make_shared<EventsFactory>();

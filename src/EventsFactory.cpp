@@ -24,6 +24,7 @@
 #include <iostream>
 #include "EventsFactory.h"
 
+using namespace std;
 
 EventsFactory:: EventsFactory ()
 {

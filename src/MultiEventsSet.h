@@ -34,8 +34,6 @@
 #include "EventsFactory.h"
 #include "Event2.h"
 
-using namespace std;
-
 /**
     La classe MultiEventsSet e' stata pensata per essere usata in un ambiente
     in cui esistono threads che producono eventi e threads che consumano
@@ -54,21 +52,21 @@ using namespace std;
 class MultiEventsSet
 {
 protected:
-    using EventsMultiMap = multimap<chrono::system_clock::time_point, shared_ptr<Event2> >;
+    using EventsMultiMap = std::multimap<std::chrono::system_clock::time_point, std::shared_ptr<Event2> >;
 
     struct DestinationEvents
     {
         EventsMultiMap                          _eventsMultiMap;
-        condition_variable                      _addedEvent;
-        string                                  _destination;
+        std::condition_variable                      _addedEvent;
+        std::string                                  _destination;
     };
 
-    using MultiEventsSetHashMap = unordered_map<string, shared_ptr<DestinationEvents> >;
+    using MultiEventsSetHashMap = std::unordered_map<std::string, std::shared_ptr<DestinationEvents> >;
 
 protected:
-    mutex                       _evSetMutex;
+    std::mutex                       _evSetMutex;
     MultiEventsSetHashMap       _esmMultiEventsSetHashMap;
-    shared_ptr<EventsFactory>   _eventsFactory;
+    std::shared_ptr<EventsFactory>   _eventsFactory;
 
 
 public:
@@ -103,7 +101,7 @@ public:
         immediatelly without waiting any timeout.
         That will cause a big usage of the CPU.
     */
-    void addDestination (string destination);
+    void addDestination (std::string destination);
 
     /**
         This method deallocate also all the events allocated
@@ -111,7 +109,7 @@ public:
     */
     ~MultiEventsSet (void);
 
-    shared_ptr<EventsFactory> getEventsFactory() const {
+    std::shared_ptr<EventsFactory> getEventsFactory() const {
         return _eventsFactory;
     }
 
@@ -127,7 +125,7 @@ public:
         L'MultiEventsSet non supporta chiavi duplicate per cui
         non possono coesistere due eventi con la stessa chiave
     */
-    virtual void addEvent (shared_ptr<Event2>& event);
+    virtual void addEvent (std::shared_ptr<Event2>& event);
 
     /**
         Rimuove il puntatore all'evento indicato dal parametro
@@ -136,7 +134,7 @@ public:
         Nota bene che l'evento non viene de-allocato, ma viene
         semplicemente rimosso il puntatore all'evento, dall'insieme.
     */
-    void deleteEvent (shared_ptr<Event2>& event);
+    void deleteEvent (std::shared_ptr<Event2>& event);
 
     /**
         Questo metodo ritorna il puntatore al primo evento.
@@ -149,9 +147,9 @@ public:
         I parametri ulSecondsToBlock e ulAdditionalMilliSecondsToBlock
         vengono considerati nel caso che bBlocking sia true.
     */
-    shared_ptr<Event2> getFirstEvent (
-        string destination, bool blocking,
-        chrono::milliseconds milliSecondsToBlock,
+    std::shared_ptr<Event2> getFirstEvent (
+        std::string destination, bool blocking,
+        std::chrono::milliseconds milliSecondsToBlock,
         bool &eventExpired);
 
     /**
@@ -172,9 +170,9 @@ public:
             I parametri ulSecondsToBlock e ulAdditionalMilliSecondsToBlock
             vengono considerati nel caso che bBlocking sia true.
     */
-    shared_ptr<Event2> getAndRemoveFirstEvent (
-        string destination, bool blocking,
-        chrono::milliseconds milliSecondsToBlock);
+    std::shared_ptr<Event2> getAndRemoveFirstEvent (
+        std::string destination, bool blocking,
+        std::chrono::milliseconds milliSecondsToBlock);
 };
 
 #endif
